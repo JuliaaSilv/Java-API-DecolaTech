@@ -6,6 +6,8 @@ public class AccountDTO {
 
     public Long id;
 
+    public Long userId;
+
     public String number;
 
     public String agency;

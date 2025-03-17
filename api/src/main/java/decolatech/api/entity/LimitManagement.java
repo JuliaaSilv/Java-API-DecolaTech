@@ -18,6 +18,9 @@ public class LimitManagement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "userId")
+    private Long userId;
+
     @Column(name = "max_limit_allowed")
     private double maxLimitAllowed;  //limite máximo que é permitido
 

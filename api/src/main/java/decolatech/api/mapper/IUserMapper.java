@@ -13,5 +13,5 @@ public interface IUserMapper {
     List<UserDTO> toDtoList(List<User> user);
 
 
-    User toEntity(decolatech.api.dto.write.UserDTO userDTO);
+    User toEntityWrite(decolatech.api.dto.write.UserDTO userDTO);
 }

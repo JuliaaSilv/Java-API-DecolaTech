@@ -20,7 +20,7 @@ public class News  {
     @Column(name = "userId")
     private Long userId;
 
-    @Column(name = "tittle")
+    @Column(name = "title")
     private String title;
 
     @Column(name = "content")

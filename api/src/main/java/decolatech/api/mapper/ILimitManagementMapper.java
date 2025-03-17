@@ -14,5 +14,5 @@ public interface ILimitManagementMapper {
     ILimitManagementMapper MAP = Mappers.getMapper(ILimitManagementMapper.class);
     LimitManagementDTO toDto(LimitManagement limitManagement);
 
-    LimitManagement toEntity(decolatech.api.dto.write.LimitManagementDTO limitManagement);
+    LimitManagement toEntityWrite(decolatech.api.dto.write.LimitManagementDTO limitManagement);
 }

@@ -13,4 +13,5 @@ public interface INewsMapper {
     List<NewsDTO> toDtoList(List<News> news);
 
     List<News> toEntityList(List<decolatech.api.dto.write.NewsDTO> news);
+    News toEntity(decolatech.api.dto.write.NewsDTO news);
 }

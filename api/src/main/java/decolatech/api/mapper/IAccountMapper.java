@@ -10,5 +10,5 @@ public interface IAccountMapper {
     IAccountMapper MAP = Mappers.getMapper(IAccountMapper.class);
     AccountDTO toDto(Account account);
 
-    Account toEntity(decolatech.api.dto.write.AccountDTO account);
+    Account toEntityWrite(decolatech.api.dto.write.AccountDTO account);
 }

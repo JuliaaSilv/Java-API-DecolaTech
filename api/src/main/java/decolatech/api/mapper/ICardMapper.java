@@ -10,5 +10,5 @@ public interface ICardMapper {
     ICardMapper MAP = Mappers.getMapper(ICardMapper.class);
     CardDTO toDto(Card card);
 
-    Card toEntity(decolatech.api.dto.write.CardDTO card);
+    Card toEntityWrite(decolatech.api.dto.write.CardDTO card);
 }

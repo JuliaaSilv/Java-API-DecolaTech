@@ -18,6 +18,9 @@ public class FinancialGoal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "userId")
+    private Long userId;
+
     @Column(name = "goal_amount")
     private double goalAmount; //Valor total da meta
 

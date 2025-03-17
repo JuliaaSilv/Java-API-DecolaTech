@@ -1,6 +1,7 @@
 package decolatech.api.dto.read;
 
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -14,7 +15,7 @@ public class UserDTO {
 
     public String phone;
 
-    public LocalDate birthdate;
+    public LocalDateTime birthdate;
 
     public String email;
 

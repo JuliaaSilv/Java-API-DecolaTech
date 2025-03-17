@@ -1,6 +1,7 @@
 package decolatech.api.service;
 
 import decolatech.api.dto.read.UserDTO;
+import decolatech.api.entity.Account;
 import decolatech.api.entity.News;
 import decolatech.api.mapper.*;
 import decolatech.api.repository.*;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static decolatech.api.MethodsAdapter.AtualizarDados;
 
 @Service
 public class UserService implements IUserService {
@@ -37,7 +40,7 @@ public class UserService implements IUserService {
         var accounts = accountRepository.findAll();
 
         for (var user : users) {
-            if (user.getId()==3){
+            if (user.getId() == 3) {
                 var teste = "teste";
             }
             UserDTO userDTO = new UserDTO();
@@ -47,20 +50,20 @@ public class UserService implements IUserService {
             userDTO.cpf = user.getCpf();
             userDTO.email = user.getEmail();
             userDTO.phone = user.getPhone();
-            userDTO.birthdate = user.getBirthDate();
+            userDTO.birthdate = user.getBirthdate();
             userDTO.password = user.getPassword();
 
             var account = accounts
-                    .stream().filter(x -> x.getId().equals(user.getAccountId()))
+                    .stream().filter(x -> x.getUserId().equals(user.getId()))
                     .findFirst();
             var card = cards
-                    .stream().filter(x -> x.getId().equals(user.getCardId()))
+                    .stream().filter(x -> x.getUserId().equals(user.getId()))
                     .findFirst();
             var limit = limits
-                    .stream().filter(x -> x.getId().equals(user.getLimitManagementId()))
+                    .stream().filter(x -> x.getUserId().equals(user.getId()))
                     .findFirst();
             var financial = financials
-                    .stream().filter(x -> x.getId().equals(user.getFinancialGoalId()))
+                    .stream().filter(x -> x.getUserId().equals(user.getId()))
                     .findFirst();
             var notifications = news
                     .stream().filter(x -> x.getUserId().equals(user.getId()))
@@ -108,59 +111,110 @@ public class UserService implements IUserService {
         if (userExists) {
             throw new RuntimeException("Cpf existente");
         }
-        var user = IUserMapper.MAP.toEntity(userDTO);
+        var user = IUserMapper.MAP.toEntityWrite(userDTO);
         var news = INewsMapper.MAP.toEntityList(userDTO.news);
-        var limit = ILimitManagementMapper.MAP.toEntity(userDTO.limitManagement);
-        var financial = IFinancialGoalMapper.MAP.toEntity(userDTO.financialGoal);
-        var card = ICardMapper.MAP.toEntity(userDTO.card);
-        var account = IAccountMapper.MAP.toEntity(userDTO.account);
-
-        var newsResult = newsRepository.saveAll(news);
-        var limitResult = limitManagementRepository.save(limit);
-        var financialResult = financialGoalRepository.save(financial);
-        var cardResult = cardRepository.save(card);
-        var accountResult = accountRepository.save(account);
-
-
-        var limitIsCreated = !(limitResult.getId() <= 0);
-        var accountIsCreated = !(accountResult.getId() <= 0);
-        var cardIsCreated = !(cardResult.getId() <= 0);
+        var limit = ILimitManagementMapper.MAP.toEntityWrite(userDTO.limitManagement);
+        var financial = IFinancialGoalMapper.MAP.toEntityWrite(userDTO.financialGoal);
+        var card = ICardMapper.MAP.toEntityWrite(userDTO.card);
+        var account = IAccountMapper.MAP.toEntityWrite(userDTO.account);
 
         var errors = new ArrayList<String>();
-
-        if (!limitIsCreated) errors.add("Limite está vazio.");
-        if (!accountIsCreated) errors.add("Conta está vazia.");
-        if (!cardIsCreated) errors.add("Cartão está vazio.");
-
-        if (!errors.isEmpty()) {
-            throw new RuntimeException ("Erro: " + String.join(" ", errors));
-        }
-        user.setLimitManagementId(limitResult.getId());
-        user.setAccountId(accountResult.getId());
-        user.setCardId(cardResult.getId());
-
         var userResult = userRepository.save(user);
+        var userIsCreated = !(userResult.getId() <= 0);
+        if (!userIsCreated) throw new RuntimeException("Não foi possivel criar o usuário");
 
-        var userIsCreated = !(userResult.getId() <=0);
-
-        if (!userIsCreated) errors.add("Não foi possivel criar o usuário");
-        if (!errors.isEmpty()) {
-            throw new RuntimeException ("Erro: " + String.join(" ", errors));
-        }
-        news.forEach(x->x.setUserId(userResult.getId()));
+        news.forEach(x -> x.setUserId(user.getId()));
+        limit.setUserId(user.getId());
+        financial.setUserId(user.getId());
+        card.setUserId(user.getId());
+        account.setUserId(user.getId());
 
         newsRepository.saveAll(news);
+        limitManagementRepository.save(limit);
         financialGoalRepository.save(financial);
+        cardRepository.save(card);
+        accountRepository.save(account);
 
         return userResult.getId();
     }
 
 
-    public Object AtualizarUsuario(decolatech.api.dto.write.UserDTO userDTO) {
-        var userExists = userRepository.findById(userDTO.id);
+    public Object AtualizarUsuario(decolatech.api.dto.write.UserDTO userDTO , Long id) {
+        var userExists = userRepository.findById(id);
         if (userExists.isEmpty()) {
             throw new RuntimeException("Usuário não encontrado");
         }
+        if (userDTO.account!=null) {
+        userDTO.account.userId = userDTO.id;
+        }
+
+        if (userDTO.card!=null) {
+        userDTO.card.userId = userDTO.id;
+        }
+
+        if (userDTO.financialGoal!=null) {
+        userDTO.financialGoal.userId = userDTO.id;
+        }
+
+        if (userDTO.limitManagement!=null) {
+        userDTO.limitManagement.userId = userDTO.id;
+        }
+
+        if (!userDTO.news.isEmpty()) {
+        userDTO.news.forEach(x->x.userId = userDTO.id);
+        }
+
+        return userRepository.findById(id)
+                .map(oldUser -> {
+                    var newUser = IUserMapper.MAP.toEntityWrite(userDTO);
+                    oldUser = AtualizarDados(oldUser, newUser);
+
+                    var accountEntity = IAccountMapper.MAP.toEntityWrite(userDTO.account);
+                    var cardEntity = ICardMapper.MAP.toEntityWrite(userDTO.card);
+                    var financialEntity = IFinancialGoalMapper.MAP.toEntityWrite(userDTO.financialGoal);
+                    var limitEntity = ILimitManagementMapper.MAP.toEntityWrite(userDTO.limitManagement);
+                    var newsEntities = userDTO.news.stream().map(INewsMapper.MAP::toEntity).toList();
+
+
+                    if (accountEntity != null) {
+                        var oldDataAccount = accountRepository.findByUserId(id);
+                        var currentAccountId = accountEntity.getId();
+                        if (!currentAccountId.equals(oldDataAccount.getId()))
+                            throw new RuntimeException("Id da conta não existe");
+                    }
+                    if (cardEntity != null) {
+                        var oldDataCard = cardRepository.findByUserId(id);
+                        var currentCardId = cardEntity.getId();
+                        if (!currentCardId.equals(oldDataCard.getId()))
+                            throw new RuntimeException("Id da conta não existe");
+                    }
+                    if (financialEntity != null) {
+                        var oldDataFinancial = financialGoalRepository.findByUserId(id);
+                        var currentFinancialId = financialEntity.getId();
+                        if(!currentFinancialId.equals(oldDataFinancial.getId()))
+                            throw new RuntimeException("Id da conta não existe");
+                    }
+                    if (limitEntity != null) {
+                        var oldDataLimit = limitManagementRepository.findByUserId(id);
+                        var currentLimitId = limitEntity.getId();
+                        if (!currentLimitId.equals(oldDataLimit.getId()))
+                            throw new RuntimeException("Id da conta não existe");
+
+
+                    }
+                    if (!newsEntities.isEmpty()) {
+                        var oldDataNews = newsRepository.findByUserId(id);
+                        for (News newsEntity : newsEntities) {
+                            if (newsEntity.getId() != null && oldDataNews.stream()
+                                    .noneMatch(existing-> existing.getId().equals(newsEntity.getId()))) {
+                                throw new RuntimeException();
+                            }
+
+                        }
+                    }
+
+
+                })
     }
 
 

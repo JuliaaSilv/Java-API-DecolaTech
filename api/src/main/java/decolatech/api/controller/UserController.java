@@ -3,10 +3,12 @@ package decolatech.api.controller;
 import decolatech.api.dto.write.UserDTO;
 import decolatech.api.service.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Perfil do Usuário")
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -37,7 +39,7 @@ public class UserController {
 
     @PostMapping()
     @Operation(summary = "Adicionar usuário")
-    public ResponseEntity<Object> create(UserDTO userDTO) {
+    public ResponseEntity<Object> create(@RequestBody UserDTO userDTO) {
         var result = userService.CriarUsuario(userDTO);
         return new ResponseEntity<Object>(result,HttpStatus.CREATED);
 

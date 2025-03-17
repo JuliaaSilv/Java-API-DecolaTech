@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,18 +20,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "account_Id")
-    private Long accountId;
-
-    @Column(name = "card_Id")
-    private Long cardId;
-
-    @Column(name = "limit_management_id")
-    private Long limitManagementId;
-
-    @Column(name = "financial_goal_id")
-    private Long financialGoalId;
 
     @Column(name = "name")
     private String name;
@@ -51,8 +39,8 @@ public class User {
     @Column(name = "account_creation_date")
     private LocalDateTime accountCreationDate;
 
-    @Column(name = "birth_Date")
-    private LocalDate birthDate;
+    @Column(name = "birthdate")
+    private LocalDateTime birthdate;
 
     @Column(name = "password")
     private String password;
